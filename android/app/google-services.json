@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "96221121822",
+    "project_id": "reusemartnotification",
+    "storage_bucket": "reusemartnotification.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:96221121822:android:ef11e87d80159c8f528d0f",
+        "android_client_info": {
+          "package_name": "com.atma.reusemart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmodFBeC90GOVEOxfP8RrlMWNnoUzKDZ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

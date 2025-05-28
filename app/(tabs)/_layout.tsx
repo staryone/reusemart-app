@@ -1,26 +1,31 @@
-import { Tabs } from "expo-router";
-import React from "react";
+import { Tabs, useRouter } from "expo-router";
+import React, { useCallback, useContext } from "react";
 import { Platform } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 import TabBarBackground from "@/components/ui/TabBarBackground";
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import { AuthContext } from "@/context/authContext";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const router = useRouter();
+  const authContext = useContext(AuthContext);
+
+  if (!authContext) {
+    throw new Error("AuthContext must be used within an AuthProvider");
+  }
+  const { isLoggedIn } = authContext;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: "#72C678",
+        tabBarInactiveTintColor: "#666",
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
             position: "absolute",
           },
           default: {},
@@ -32,16 +37,56 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+            <MaterialIcons name="home-filled" size={28} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="notification"
         options={{
-          title: "Explora",
+          title: "Notification",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <MaterialIcons name="notifications" size={28} color={color} />
+          ),
+          tabBarButton: (props) => (
+            <HapticTab
+              {...props}
+              onPress={(e) => {
+                if (!isLoggedIn) {
+                  e.preventDefault();
+                  router.push("/(auth)/login");
+                } else {
+                  // Safely call onPress if it exists
+                  if (props.onPress) {
+                    props.onPress(e);
+                  }
+                }
+              }}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="Profil/index"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="account-circle" size={28} color={color} />
+          ),
+          tabBarButton: (props) => (
+            <HapticTab
+              {...props}
+              onPress={(e) => {
+                if (!isLoggedIn) {
+                  e.preventDefault();
+                  router.push("/(auth)/login");
+                } else {
+                  if (props.onPress) {
+                    props.onPress(e);
+                  }
+                }
+              }}
+            />
           ),
         }}
       />
