@@ -1,7 +1,7 @@
 import { AuthProvider } from "@/context/authContext";
 import { Stack, useRouter } from "expo-router";
 import "react-native-reanimated";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Alert, Platform } from "react-native";
 import {
   getMessaging,
@@ -15,28 +15,28 @@ import {
   setHasRequestedPermission,
 } from "@/utils/notificationHandler";
 import { setupBackgroundNotificationHandler } from "@/utils/notificationBackgroundHandler";
-import PermissionDialog from "@/components/PermissionDialog";
 
 export default function RootLayout() {
   const router = useRouter();
-  const [showPermissionDialog, setShowPermissionDialog] =
-    useState<boolean>(false);
 
   useEffect(() => {
     const checkFirstLaunch = async () => {
       try {
         const hasRequested = await hasRequestedPermission();
         if (!hasRequested) {
-          if (Platform.OS === "ios") {
-            const granted = await requestNotificationPermission(true);
-            if (granted) {
-              console.log("Provisional permission granted on iOS.");
-            }
-            await setHasRequestedPermission();
-          } else {
-            setShowPermissionDialog(true);
+          // Minta izin untuk Android dan iOS
+          const granted = await requestNotificationPermission(
+            Platform.OS === "ios" // Hanya gunakan provisional untuk iOS
+          );
+          if (!granted) {
+            Alert.alert(
+              "Izin Ditolak",
+              "Anda telah menolak izin notifikasi. Anda dapat mengaktifkannya kapan saja di pengaturan perangkat."
+            );
           }
+          await setHasRequestedPermission();
         } else {
+          // Jika sudah pernah diminta, cek ulang izin
           const granted = await requestNotificationPermission();
           if (!granted) {
             console.log("Notification permission was previously denied.");
@@ -92,31 +92,6 @@ export default function RootLayout() {
     };
   }, [router]);
 
-  const handleAcceptPermission = async () => {
-    setShowPermissionDialog(false);
-    try {
-      const granted = await requestNotificationPermission();
-      if (!granted) {
-        Alert.alert(
-          "Izin Ditolak",
-          "Anda telah menolak izin notifikasi. Anda dapat mengaktifkannya kapan saja di pengaturan perangkat."
-        );
-      }
-      await setHasRequestedPermission();
-    } catch (error) {
-      console.error("Error handling permission acceptance:", error);
-    }
-  };
-
-  const handleDeclinePermission = async () => {
-    setShowPermissionDialog(false);
-    await setHasRequestedPermission();
-    Alert.alert(
-      "Izin Ditolak",
-      "Anda telah menolak izin notifikasi. Anda dapat mengaktifkannya kapan saja di pengaturan perangkat."
-    );
-  };
-
   return (
     <AuthProvider>
       <Stack>
@@ -124,11 +99,6 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
-      <PermissionDialog
-        visible={showPermissionDialog}
-        onAccept={handleAcceptPermission}
-        onDecline={handleDeclinePermission}
-      />
     </AuthProvider>
   );
 }

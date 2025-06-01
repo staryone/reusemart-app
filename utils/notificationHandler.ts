@@ -4,16 +4,37 @@ import {
   getToken,
 } from "@react-native-firebase/messaging";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { PermissionsAndroid, Platform } from "react-native";
 
 export const requestNotificationPermission = async (
   provisional: boolean = false
 ): Promise<boolean> => {
   try {
+    let enabled = false;
+
+    // Untuk Android 13+ (API Level 33), minta izin POST_NOTIFICATIONS
+    if (Platform.OS === "android" && Platform.Version >= 33) {
+      const permission = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+      );
+      if (permission === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("Android POST_NOTIFICATIONS permission granted.");
+        enabled = true;
+      } else {
+        console.log("Android POST_NOTIFICATIONS permission denied.");
+        return false;
+      }
+    }
+
+    // Untuk iOS atau Android < 13, gunakan Firebase requestPermission
     const messaging = getMessaging();
-    const authStatus = await requestPermission(messaging);
-    const enabled =
+    const authStatus = await requestPermission(messaging, {
+      provisional, // Hanya untuk iOS
+    });
+    enabled =
+      enabled ||
       authStatus === 1 || // AUTHORIZED
-      authStatus === 2; // PROVISIONAL
+      authStatus === 2; // PROVISIONAL (iOS only)
 
     if (enabled) {
       console.log("Notification permission granted.");

@@ -6,7 +6,6 @@ import PembeliProfile from "@/components/profiles/PembeliProfile";
 import PenitipProfile from "@/components/profiles/PenitipProfile";
 import KurirProfile from "@/components/profiles/KurirProfile";
 import HunterProfile from "@/components/profiles/HunterProfile";
-import LogoutButton from "@/components/LogoutButton";
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -17,14 +16,19 @@ export default function ProfileScreen() {
   }
   const { isLoggedIn, role } = authContext;
 
-  // Redirect to login if not logged in
   useEffect(() => {
-    if (!isLoggedIn) {
+    const validRoles = ["PEMBELI", "PENITIP", "KURIR", "HUNTER"];
+    if (!isLoggedIn || !role || !validRoles.includes(role)) {
       router.replace("/(auth)/login");
     }
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, role, router]);
 
-  let ProfileComponent = null;
+  const validRoles = ["PEMBELI", "PENITIP", "KURIR", "HUNTER"];
+  if (!isLoggedIn || !role || !validRoles.includes(role)) {
+    return null;
+  }
+
+  let ProfileComponent;
   switch (role) {
     case "PEMBELI":
       ProfileComponent = PembeliProfile;
@@ -39,7 +43,6 @@ export default function ProfileScreen() {
       ProfileComponent = HunterProfile;
       break;
     default:
-      router.replace("/(auth)/login"); // Fallback if role is invalid
       return null;
   }
 
