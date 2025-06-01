@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { AuthContext } from "@/context/authContext";
+import { BASE_API_URL } from "@/utils/api";
 
 // Define the type for a notification
 interface Notification {
@@ -51,14 +52,11 @@ export default function NotificationScreen() {
           setLoading(true);
         }
 
-        const response = await fetch(
-          "http://192.168.148.202:3001/api/notifications",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch(BASE_API_URL + "/api/notifications", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         const res: ResponseAPI = await response.json();
         if (!response.ok) {

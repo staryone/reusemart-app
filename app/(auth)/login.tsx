@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import { AuthContext } from "@/context/authContext";
+import { BASE_API_URL } from "@/utils/api";
 
 interface LoginResponse {
   data: {
@@ -93,19 +94,16 @@ const LoginScreen: React.FC = () => {
     setIsLoading(true); // Start loading state
 
     try {
-      const response = await fetch(
-        "http://192.168.148.202:3001/api/login/mobile",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            password,
-          }),
-        }
-      );
+      const response = await fetch(BASE_API_URL + "/api/login/mobile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
       const res: LoginResponse = await response.json();
       const data = res.data;

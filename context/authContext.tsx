@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getFcmToken } from "../utils/notificationHandler";
+import { BASE_API_URL } from "@/utils/api";
 
 interface AuthContextType {
   isLoggedIn: boolean;
@@ -64,19 +65,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         await AsyncStorage.setItem("fcmToken", newFcmToken);
         setFcmToken(newFcmToken);
 
-        const response = await fetch(
-          "http://192.168.148.202:3001/api/users/update-fcm",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${newToken}`,
-            },
-            body: JSON.stringify({
-              fcmToken: newFcmToken,
-            }),
-          }
-        );
+        const response = await fetch(BASE_API_URL + "/api/users/update-fcm", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${newToken}`,
+          },
+          body: JSON.stringify({
+            fcmToken: newFcmToken,
+          }),
+        });
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -95,7 +93,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const logout = async () => {
     try {
       const token = await AsyncStorage.getItem("userToken");
-      const response = await fetch("http://192.168.148.202:3001/api/logout", {
+      const response = await fetch(BASE_API_URL + "/api/logout", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
