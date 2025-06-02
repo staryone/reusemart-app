@@ -1,10 +1,11 @@
-import { ThemedText } from "@/components/ThemedText";
-import { AuthContext } from "@/context/authContext";
-import { BASE_API_URL } from "@/utils/api";
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import { Image, RefreshControl, ScrollView, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import LogoutButton from "../LogoutButton";
+import { AuthContext } from '@/context/authContext';
+import { BASE_API_URL } from '@/utils/api';
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { Platform, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import LogoutButton from '../LogoutButton';
 
 interface Penitip {
   nama: string;
@@ -21,40 +22,23 @@ interface ResponseAPI {
   errors?: string;
 }
 
-// Komponen untuk menampilkan bullet point dengan format rapi
-const BulletPoint: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
-  <View style={styles.bulletContainer}>
-    <ThemedText style={styles.bullet}>•</ThemedText>
-    <ThemedText style={styles.bulletText}>
-      <ThemedText style={styles.bold}>{label}</ThemedText>: {value}
-    </ThemedText>
-  </View>
-);
-
-// Komponen untuk kartu individual (saldo, rating, poin)
-const StatCard: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
-  <View style={styles.statCard}>
-    <ThemedText style={styles.statLabel}>{label}</ThemedText>
-    <ThemedText style={styles.statValue}>{value}</ThemedText>
-  </View>
-);
-
 export default function PenitipProfile() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [penitip, setPenitip] = useState<Penitip | null>(null);
   const authContext = useContext(AuthContext);
+  const navigation = useNavigation();
 
   if (!authContext) {
-    throw new Error("AuthContext must be used within an AuthProvider");
+    throw new Error('AuthContext must be used within an AuthProvider');
   }
   const { token, isLoggedIn } = authContext;
 
   const fetchProfile = useCallback(
     async (isRefresh = false) => {
       if (!isLoggedIn || !token) {
-        setError("Silakan masuk untuk melihat profil");
+        setError('Silakan masuk untuk melihat profil');
         setLoading(false);
         setRefreshing(false);
         return;
@@ -67,7 +51,7 @@ export default function PenitipProfile() {
           setLoading(true);
         }
 
-        const response = await fetch(BASE_API_URL + "/api/penitip/current", {
+        const response = await fetch(`${BASE_API_URL}/api/penitip/current`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -75,7 +59,7 @@ export default function PenitipProfile() {
 
         const res: ResponseAPI = await response.json();
         if (!response.ok) {
-          throw new Error(res.errors || "Gagal mengambil data profil");
+          throw new Error(res.errors || 'Gagal mengambil data profil');
         }
 
         if (res.data) {
@@ -83,7 +67,7 @@ export default function PenitipProfile() {
         }
         setError(null);
       } catch (err) {
-        setError("Terjadi kesalahan saat mengambil data profil");
+        setError('Terjadi kesalahan saat mengambil data profil');
         console.error(err);
       } finally {
         setLoading(false);
@@ -101,187 +85,372 @@ export default function PenitipProfile() {
     fetchProfile(true);
   };
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#5CB85C" />
-        }
-      >
-        {/* Bagian Header */}
-        <View style={styles.header}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/120' }} // Slightly larger placeholder for avatar
-            style={styles.avatar}
-          />
-          <ThemedText style={styles.profileText}>Halo, {penitip?.nama || "Penitip"}</ThemedText>
-          <ThemedText style={styles.profileDetail}>
-            Selamat datang! Kelola barang titipan dan lihat statusnya di sini.
-          </ThemedText>
+      <View style={styles.mainContainer}>
+        {/* Header */}
+        <View style={[styles.header, styles.backdropBlur]}>
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Profil</Text>
+          </View>
         </View>
 
-        {/* Bagian Statistik (Saldo, Rating, Poin) */}
-        {!loading && !error && penitip && (
-          <View style={styles.statsContainer}>
-            <StatCard label="Saldo" value={`Rp${penitip.saldo.toLocaleString('id-ID')}`} />
-            <StatCard label="Rating" value={`${penitip.rating.toFixed(1)}/5`} />
-            <StatCard label="Poin" value={penitip.poin} />
-          </View>
-        )}
-
-        {/* Bagian Detail Profil */}
-        {loading && (
-          <ThemedText style={styles.infoText}>Memuat data profil...</ThemedText>
-        )}
-        {error && (
-          <ThemedText style={styles.errorText}>{error}</ThemedText>
-        )}
-        {!loading && !error && penitip && (
+        {/* Main Content */}
+        <ScrollView
+          style={styles.scrollView}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
           <View style={styles.profileSection}>
-            <ThemedText style={styles.sectionTitle}>Detail Profil</ThemedText>
-            <BulletPoint label="Nama" value={penitip.nama} />
-            <BulletPoint label="Alamat" value={penitip.alamat} />
-            <BulletPoint label="Email" value={penitip.email} />
-            <BulletPoint label="Nomor Telepon" value={penitip.nomor_telepon} />
+            <View style={styles.profileInfo}>
+              <Text style={styles.profileName}>
+                {penitip?.nama || 'Ethan Carter'}
+              </Text>
+              <Text style={styles.profileLocation}>
+                {penitip?.alamat || 'San Francisco, CA'}
+              </Text>
+            </View>
           </View>
-        )}
 
-        {/* Tombol Logout */}
-        <LogoutButton />
-      </ScrollView>
+          <Text style={styles.sectionTitle}>Akun</Text>
+          <View style={styles.accountSection}>
+            <TouchableOpacity style={styles.accountItem}>
+              <View style={styles.accountIconContainer}>
+                <Icon name="email" size={24} color="#38e07b" />
+              </View>
+              <View style={styles.accountTextContainer}>
+                <Text style={styles.accountLabel}>Email</Text>
+                <Text style={styles.accountValue}>
+                  {penitip?.email || 'ethan.carter@email.com'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.accountItem}>
+              <View style={styles.accountIconContainer}>
+                <Icon name="phone" size={24} color="#38e07b" />
+              </View>
+              <View style={styles.accountTextContainer}>
+                <Text style={styles.accountLabel}>Nomor Telepon</Text>
+                <Text style={styles.accountValue}>
+                  {penitip?.nomor_telepon || '+1 (555) 123-4567'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.rewardsSection}>
+            <View style={styles.rewardCard}>
+              <View style={styles.rewardItem}>
+                <Icon name="account-balance-wallet" size={20} color="white" />
+                <Text style={styles.rewardLabel}>Saldo</Text>
+              </View>
+              <Text style={styles.rewardValue}>
+                Rp{penitip?.saldo?.toLocaleString('id-ID') || '125.00'}
+              </Text>
+            </View>
+            <View style={styles.rewardCardSecondary}>
+              <View style={styles.rewardItem}>
+                <Icon name="star" size={20} color="#f59e0b" />
+                <Text style={styles.rewardLabelSecondary}>Peringkat</Text>
+              </View>
+              <Text style={styles.rewardValueSecondary}>
+                {penitip?.rating || '4.8'}
+              </Text>
+            </View>
+          </View>
+          <View style={[styles.rewardCardSecondary, styles.pointsCard]}>
+            <View style={styles.rewardItem}>
+              <Icon name="military-tech" size={20} color="#8b5cf6" />
+              <Text style={styles.rewardLabelSecondary}>Poin</Text>
+            </View>
+            <Text style={styles.rewardValueSecondary}>
+              {penitip?.poin || 150} Pts
+            </Text>
+          </View>
+          <LogoutButton />
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F0F4F8", // Lighter background for a modern feel
+    backgroundColor: '#ffffff',
   },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: 30, // Increased margin for more breathing room
-    backgroundColor: "#FFFFFF",
-    paddingVertical: 30,
-    borderRadius: 15, // Slightly more rounded header
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08, // Softer shadow
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  avatar: {
-    width: 120, // Slightly larger avatar
-    height: 120,
-    borderRadius: 60, // Keep it perfectly round
-    marginBottom: 20, // Increased margin
-    borderWidth: 3, // Thicker border
-    borderColor: "#5CB85C", // A slightly darker, more vibrant green
-  },
-  profileText: {
-    textAlign: "center",
-    marginBottom: 8,
-    fontSize: 32, // Larger font size for prominence
-    fontWeight: "700", // Bolder font weight
-    color: "#34495E", // Darker text for better contrast
-  },
-  profileDetail: {
-    textAlign: "center",
-    color: "#7F8C8D", // Softer grey for description
-    fontSize: 15,
-    lineHeight: 22,
-    paddingHorizontal: 20, // Add horizontal padding
-  },
-  statsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around", // Distribute space evenly
-    marginBottom: 25,
-    marginHorizontal: -5, // Counteract card margin for full width
-  },
-  statCard: {
+  mainContainer: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    paddingVertical: 20, // More vertical padding
-    paddingHorizontal: 10,
-    borderRadius: 15, // More rounded corners
-    marginHorizontal: 7, // Increased margin between cards
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1, // Softer shadow
-    shadowRadius: 8,
-    elevation: 5,
-    alignItems: "center",
+    flexDirection: 'column',
+    justifyContent: 'space-between',
   },
-  statLabel: {
-    fontSize: 13, // Slightly smaller label
-    color: "#7F8C8D", // Softer grey
-    marginBottom: 6,
-    fontWeight: "500",
-  },
-  statValue: {
-    fontSize: 20, // Larger value for impact
-    fontWeight: "700", // Bolder value
-    color: "#5CB85C", // Vibrant green
-  },
-  profileSection: {
-    marginBottom: 25,
-    backgroundColor: "#FFFFFF",
-    padding: 25, // More padding inside the section
-    borderRadius: 15, // More rounded corners
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1, // Softer shadow
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  sectionTitle: {
-    fontSize: 24, // Larger title
-    fontWeight: "700", // Bolder title
-    color: "#34495E", // Darker color
-    marginBottom: 20, // Increased margin
-    borderBottomWidth: 1, // Subtle separator
-    borderBottomColor: "#ECF0F1",
-    paddingBottom: 10,
-  },
-  bulletContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start", // Align bullet with top of text
-    marginTop: 12, // Increased spacing between bullets
-    paddingLeft: 5,
-  },
-  bullet: {
-    fontSize: 18, // Slightly larger bullet
-    color: "#5CB85C", // Green bullet
-    marginRight: 10,
-    lineHeight: 22, // Match text line height
-  },
-  bulletText: {
-    fontSize: 16,
-    color: "#34495E", // Darker text
-    lineHeight: 22, // Consistent line height
+  loadingContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  bold: {
-    fontWeight: "600",
-    color: "#34495E", // Ensure bold text is also dark
+  loadingText: {
+    fontSize: 18,
+    color: '#0e1a13',
   },
-  infoText: {
-    textAlign: "center",
-    color: "#7F8C8D", // Softer grey for info text
-    fontSize: 16,
-    marginBottom: 20,
-    fontStyle: "italic",
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   errorText: {
-    textAlign: "center",
-    color: "#E74C3C", // A more distinct error red
+    fontSize: 18,
+    color: '#ef4444',
+  },
+  header: {
+    position: 'sticky',
+    top: 0,
+    padding: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  backdropBlur: {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    // Note: React Native doesn't support backdrop-filter
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+  },
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#0e1a13',
+  },
+  scrollView: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  profileSection: {
+    width: '100%',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  profileInfo: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingTop: 24,
+  },
+  profileName: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#0e1a13',
+    textAlign: 'center',
+  },
+  profileLocation: {
     fontSize: 16,
-    marginBottom: 20,
-    fontWeight: "500",
+    fontWeight: '400',
+    color: '#6b7280',
+    textAlign: 'center',
+  },
+  profileMemberSince: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#6b7280',
+    textAlign: 'center',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#0e1a13',
+    marginBottom: 8,
+    marginTop: 24,
+  },
+  accountSection: {
+    marginBottom: 16,
+  },
+  accountItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 4,
+  },
+  accountIconContainer: {
+    width: 48,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+    backgroundColor: '#e8f2ec',
+  },
+  accountTextContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    marginLeft: 16,
+  },
+  accountLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6b7280',
+  },
+  accountValue: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#0e1a13',
+  },
+  rewardsSection: {
+    flexDirection: 'row',
+    gap: 20,
+    marginBottom: 12,
+  },
+  rewardCard: {
+    flex: 1,
+    flexDirection: 'column',
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: '#38e07b',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  rewardCardSecondary: {
+    // marginBottom: 15,
+    flex: 1,
+    flexDirection: 'column',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#ffffff',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  pointsCard: {
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  rewardItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  rewardLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#ffffff',
+    marginLeft: 8,
+  },
+  rewardLabelSecondary: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6b7280',
+    marginLeft: 8,
+  },
+  rewardValue: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  rewardValueSecondary: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#0e1a13',
+  },
+  bottomNav: {
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+    backgroundColor: '#ffffff',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  navItem: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  navText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6b7280',
+  },
+  navTextActive: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#38e07b',
+  },
+  notificationContainer: {
+    position: 'relative',
+  },
+  notificationBadge: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#ef4444',
+    borderWidth: 2,
+    borderColor: '#ffffff',
   },
 });
+
