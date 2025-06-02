@@ -1,20 +1,20 @@
 import { AuthProvider } from "@/context/authContext";
-import { Stack, useRouter } from "expo-router";
-import "react-native-reanimated";
-import { useEffect } from "react";
-import { Alert, Platform } from "react-native";
+import { setupBackgroundNotificationHandler } from "@/utils/notificationBackgroundHandler";
 import {
-  getMessaging,
-  onMessage,
-  getInitialNotification,
-  onNotificationOpenedApp,
-} from "@react-native-firebase/messaging";
-import {
-  requestNotificationPermission,
   hasRequestedPermission,
+  requestNotificationPermission,
   setHasRequestedPermission,
 } from "@/utils/notificationHandler";
-import { setupBackgroundNotificationHandler } from "@/utils/notificationBackgroundHandler";
+import {
+  getInitialNotification,
+  getMessaging,
+  onMessage,
+  onNotificationOpenedApp,
+} from "@react-native-firebase/messaging";
+import { Stack, useRouter } from "expo-router";
+import { useEffect } from "react";
+import { Alert, Platform } from "react-native";
+import "react-native-reanimated";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -95,6 +95,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
