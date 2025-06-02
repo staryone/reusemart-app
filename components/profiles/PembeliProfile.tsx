@@ -5,6 +5,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Platform, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import LogoutButton from '../LogoutButton';
 
 interface Pembeli {
   nama: string;
@@ -162,8 +163,9 @@ export default function PembeliProfile() {
               {pembeli?.poin_loyalitas || 150} Pts
             </Text>
           </View>
+          <LogoutButton />
         </ScrollView>
-
+        
       </View>
     </SafeAreaView>
   );
@@ -347,6 +349,7 @@ const styles = StyleSheet.create({
   },
   pointsCard: {
     marginTop: 12,
+    marginBottom: 15
   },
   rewardItem: {
     flexDirection: 'row',

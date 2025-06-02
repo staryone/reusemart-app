@@ -4,8 +4,10 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Platform, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import FontAwesome from 'react-native-vector-icons/FontAwesome6';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import LogoutButton from '../LogoutButton';
+
 
 interface Penitip {
   nama: string;
@@ -15,6 +17,7 @@ interface Penitip {
   saldo: number;
   rating: number;
   poin: number;
+  is_top_seller: boolean;
 }
 
 interface ResponseAPI {
@@ -130,6 +133,16 @@ export default function PenitipProfile() {
               <Text style={styles.profileLocation}>
                 {penitip?.alamat || 'San Francisco, CA'}
               </Text>
+              {penitip?.is_top_seller ? 
+                <View style={styles.badgeTopSeller}>
+                  <Text style={styles.topSellerFont}>
+                    Top Seller
+                  </Text> 
+                  <FontAwesome name="award" size={24} color={'#5145CD'}/>
+                </View>
+                :
+                <></>
+              }
             </View>
           </View>
 
@@ -261,12 +274,26 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'column',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 15,
+    marginTop: 10,
   },
   profileInfo: {
     flexDirection: 'column',
     alignItems: 'center',
     paddingTop: 24,
+  },
+  badgeTopSeller: {
+    backgroundColor: '#B4C6FF',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginTop: 20,
+    flexDirection: 'row',
+    gap: 5,
+    alignItems: 'center'
+  },
+  topSellerFont: {
+    color: '#5145CD',
   },
   profileName: {
     fontSize: 24,
