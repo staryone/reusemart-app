@@ -93,7 +93,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const logout = async () => {
     try {
       const token = await AsyncStorage.getItem("userToken");
-      const response = await fetch(BASE_API_URL + "/api/logout", {
+      const response = await fetch(BASE_API_URL + "/api/logoutMobile", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
