@@ -112,6 +112,7 @@ export default function LogoutButton() {
 const styles = StyleSheet.create({
   logoutButton: {
     backgroundColor: "#72C678",
+    width: 350,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,

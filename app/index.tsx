@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Komponen untuk menampilkan bullet point dengan struktur yang lebih rapi
 const BulletPoint: React.FC<{ title: string; description: string }> = ({ title, description }) => (
   <View style={styles.bulletContainer}>
     <Text style={styles.bullet}>•</Text>
