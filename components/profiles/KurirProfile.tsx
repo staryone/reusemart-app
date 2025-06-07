@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import LogoutButton from "../LogoutButton";
+import { router } from "expo-router";
 
 interface Jabatan {
   id_jabatan: number;
@@ -182,7 +183,14 @@ export default function KurirProfile() {
                 </Text>
               </View>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.logoutButton}
+              onPress={() => router.push("/kurir/pengiriman")}
+            >
+              <Text style={styles.logoutButtonText}>Pengiriman</Text>
+            </TouchableOpacity>
           </View>
+
           <LogoutButton />
         </ScrollView>
       </View>
@@ -453,5 +461,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#ef4444",
     borderWidth: 2,
     borderColor: "#ffffff",
+  },
+  logoutButton: {
+    backgroundColor: "#72C678",
+    width: 350,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    alignSelf: "center",
+  },
+  logoutButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
