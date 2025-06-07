@@ -143,7 +143,7 @@ const ShipmentScreen: React.FC = () => {
         }
 
         const response = await fetch(
-          `${BASE_API_URL}/api/pengiriman/lists-dikirim?status=${selectedFilter}&page=1&limit=10`,
+          `${BASE_API_URL}/api/pengiriman/lists-dikirim-kurir?status=${selectedFilter}&page=1&limit=10`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
