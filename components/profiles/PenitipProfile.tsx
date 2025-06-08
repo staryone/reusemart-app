@@ -1,13 +1,13 @@
 import { AuthContext } from '@/context/authContext';
 import { BASE_API_URL } from '@/utils/api';
 import { useNavigation } from '@react-navigation/native';
+import { router } from 'expo-router';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Platform, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FontAwesome from 'react-native-vector-icons/FontAwesome6';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import LogoutButton from '../LogoutButton';
-
 
 interface Penitip {
   nama: string;
@@ -125,6 +125,7 @@ export default function PenitipProfile() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
+          {/* Profile Section */}
           <View style={styles.profileSection}>
             <View style={styles.profileInfo}>
               <Text style={styles.profileName}>
@@ -133,19 +134,16 @@ export default function PenitipProfile() {
               <Text style={styles.profileLocation}>
                 {penitip?.alamat || 'San Francisco, CA'}
               </Text>
-              {penitip?.is_top_seller ? 
+              {penitip?.is_top_seller ? (
                 <View style={styles.badgeTopSeller}>
-                  <Text style={styles.topSellerFont}>
-                    Top Seller
-                  </Text> 
-                  <FontAwesome name="award" size={24} color={'#5145CD'}/>
+                  <Text style={styles.topSellerFont}>Top Seller</Text>
+                  <FontAwesome name="award" size={24} color={'#5145CD'} />
                 </View>
-                :
-                <></>
-              }
+              ) : null}
             </View>
           </View>
 
+          {/* Account Section */}
           <Text style={styles.sectionTitle}>Akun</Text>
           <View style={styles.accountSection}>
             <TouchableOpacity style={styles.accountItem}>
@@ -170,8 +168,21 @@ export default function PenitipProfile() {
                 </Text>
               </View>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.accountItem}
+              onPress={() => router.push('/penitip/DaftarBarang')}
+            >
+              <View style={styles.accountIconContainer}>
+                <Icon name="list" size={24} color="#38e07b" />
+              </View>
+              <View style={styles.accountTextContainer}>
+                <Text style={styles.accountLabel}>Daftar Barang</Text>
+                <Text style={styles.accountValue}>Lihat barang yang dititipkan</Text>
+              </View>
+            </TouchableOpacity>
           </View>
 
+          {/* Rewards Section */}
           <View style={styles.rewardsSection}>
             <View style={styles.rewardCard}>
               <View style={styles.rewardItem}>
@@ -206,7 +217,7 @@ export default function PenitipProfile() {
       </View>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -246,18 +257,10 @@ const styles = StyleSheet.create({
   },
   backdropBlur: {
     backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    // Note: React Native doesn't support backdrop-filter
   },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
   },
   headerTitle: {
     flex: 1,
@@ -290,7 +293,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     flexDirection: 'row',
     gap: 5,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   topSellerFont: {
     color: '#5145CD',
@@ -303,12 +306,6 @@ const styles = StyleSheet.create({
   },
   profileLocation: {
     fontSize: 16,
-    fontWeight: '400',
-    color: '#6b7280',
-    textAlign: 'center',
-  },
-  profileMemberSince: {
-    fontSize: 14,
     fontWeight: '400',
     color: '#6b7280',
     textAlign: 'center',
@@ -379,7 +376,6 @@ const styles = StyleSheet.create({
     }),
   },
   rewardCardSecondary: {
-    // marginBottom: 15,
     flex: 1,
     flexDirection: 'column',
     padding: 16,
@@ -430,54 +426,4 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#0e1a13',
   },
-  bottomNav: {
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-    backgroundColor: '#ffffff',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 8,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  navItem: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  navText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#6b7280',
-  },
-  navTextActive: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#38e07b',
-  },
-  notificationContainer: {
-    position: 'relative',
-  },
-  notificationBadge: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#ef4444',
-    borderWidth: 2,
-    borderColor: '#ffffff',
-  },
 });
-
