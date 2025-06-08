@@ -170,7 +170,7 @@ export default function PenitipProfile() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.accountItem}
-              onPress={() => router.push('/penitip/DaftarBarang')}
+              onPress={() => router.push('/penitip/daftarBarang')}
             >
               <View style={styles.accountIconContainer}>
                 <Icon name="list" size={24} color="#38e07b" />
