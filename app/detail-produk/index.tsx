@@ -1,6 +1,6 @@
 import { BASE_API_URL } from "@/utils/api";
-import { useNavigation, useRoute } from "@react-navigation/native";
 import { Image } from "expo-image";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Platform,
@@ -52,32 +52,63 @@ export default function ProductDetails() {
   const [barang, setBarang] = useState<Barang | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const route = useRoute();
-  const navigation = useNavigation();
-  const { id } = route.params as { id: string };
+  const router = useRouter();
+  const params = useLocalSearchParams<{ id: string }>();
+  const id = params.id;
 
   const fetchBarangDetails = useCallback(async () => {
+    if (!id) {
+      setError("ID barang tidak valid");
+      setLoading(false);
+      console.error("No ID provided in route params");
+      return;
+    }
+
     try {
       setLoading(true);
+      console.log("Fetching product details for ID:", id);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // Timeout 10 detik
+
       const response = await fetch(`${BASE_API_URL}/api/barang/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
+
       const res: ResponseAPI = await response.json();
+      console.log("API Response:", res);
+
       if (!response.ok) {
-        throw new Error(res.errors || "Gagal mengambil detail barang");
+        throw new Error(
+          res.errors ||
+            `Gagal mengambil detail barang (Status: ${response.status})`
+        );
       }
 
-      if (res.data) {
-        setBarang(res.data);
+      if (!res.data) {
+        throw new Error("Data barang tidak ditemukan");
       }
+
+      setBarang(res.data);
       setError(null);
     } catch (err) {
-      setError("Terjadi kesalahan saat mengambil detail barang");
-      console.error(err);
+      const errorMessage =
+        err &&
+        typeof err === "object" &&
+        "name" in err &&
+        (err as any).name === "AbortError"
+          ? "Permintaan ke server terlalu lama"
+          : err && typeof err === "object" && "message" in err
+          ? (err as any).message
+          : "Terjadi kesalahan saat mengambil detail barang";
+      setError(errorMessage);
+      console.error("Error:", err);
     } finally {
       setLoading(false);
     }
@@ -115,6 +146,12 @@ export default function ProductDetails() {
           onPress={fetchBarangDetails}
         >
           <Text style={styles.retryButtonText}>Coba Lagi</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Text style={styles.backButtonText}>Kembali</Text>
         </TouchableOpacity>
       </View>
     );
@@ -315,8 +352,20 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
+    marginBottom: 8,
   },
   retryButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  backButton: {
+    backgroundColor: "#6b7280",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  backButtonText: {
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",

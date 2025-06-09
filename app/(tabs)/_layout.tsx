@@ -1,11 +1,11 @@
 import { Tabs, useRouter } from "expo-router";
-import React, { useCallback, useContext } from "react";
+import React, { useContext } from "react";
 import { Platform } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import TabBarBackground from "@/components/ui/TabBarBackground";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { AuthContext } from "@/context/authContext";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 
 export default function TabLayout() {
   const router = useRouter();
@@ -72,6 +72,30 @@ export default function TabLayout() {
           title: "Profile",
           tabBarIcon: ({ color }) => (
             <MaterialIcons name="account-circle" size={28} color={color} />
+          ),
+          tabBarButton: (props) => (
+            <HapticTab
+              {...props}
+              onPress={(e) => {
+                if (!isLoggedIn) {
+                  e.preventDefault();
+                  router.push("/(auth)/login");
+                } else {
+                  if (props.onPress) {
+                    props.onPress(e);
+                  }
+                }
+              }}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="detail-produk/index"
+        options={{
+          title: "DetailProduk",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="settings" size={28} color={color} />
           ),
           tabBarButton: (props) => (
             <HapticTab
