@@ -3,6 +3,8 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
+  Dimensions,
+  FlatList,
   Platform,
   ScrollView,
   StyleSheet,
@@ -18,7 +20,7 @@ interface Barang {
   harga: number;
   gambar: Gambar[];
   deskripsi: string;
-  garansi: string;
+  garansi: string | null;
   berat: number;
   kategori: Kategori;
   penitip: Penitip;
@@ -52,6 +54,7 @@ export default function ProductDetails() {
   const [barang, setBarang] = useState<Barang | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // State untuk indeks gambar aktif
   const router = useRouter();
   const params = useLocalSearchParams<{ id: string }>();
   const id = params.id;
@@ -69,7 +72,7 @@ export default function ProductDetails() {
       console.log("Fetching product details for ID:", id);
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // Timeout 10 detik
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       const response = await fetch(`${BASE_API_URL}/api/barang/${id}`, {
         method: "GET",
@@ -118,12 +121,46 @@ export default function ProductDetails() {
     fetchBarangDetails();
   }, [fetchBarangDetails]);
 
-  const getPrimaryGambar = (gambars: Gambar[]): string => {
-    const primaryGambar = gambars.find((gambar) => gambar.is_primary);
-    return primaryGambar
-      ? primaryGambar.url_gambar
-      : "https://via.placeholder.com/300";
+  // Fungsi untuk format tanggal ke lokal Indonesia
+  const formatLocalDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return `${date.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })} ${date.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    })}`;
   };
+
+  const getWarrantyStatus = (garansi: string | null): string => {
+    if (!garansi) {
+      return "Tidak ada";
+    }
+    const warrantyDate = new Date(garansi);
+    const currentDate = new Date(); // Waktu saat ini
+    return warrantyDate > currentDate ? "Aktif" : "Berakhir";
+  };
+
+  // Render item untuk FlatList gambar
+  const renderImageItem = ({ item }: { item: Gambar }) => (
+    <Image
+      source={{ uri: item.url_gambar || "https://via.placeholder.com/300" }}
+      style={styles.productImage}
+      contentFit="cover"
+    />
+  );
+
+  // Handler untuk update indeks gambar saat scroll
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: { viewableItems: any[] }) => {
+      if (viewableItems.length > 0) {
+        setCurrentImageIndex(viewableItems[0].index || 0);
+      }
+    },
+    []
+  );
 
   if (loading) {
     return (
@@ -160,11 +197,47 @@ export default function ProductDetails() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Image
-          source={{ uri: getPrimaryGambar(barang.gambar) }}
-          style={styles.productImage}
-          contentFit="cover"
-        />
+        {/* Carousel Gambar */}
+        <View style={styles.carouselContainer}>
+          <FlatList
+            data={
+              barang.gambar.length > 0
+                ? barang.gambar
+                : [
+                    {
+                      id_gambar: 0,
+                      url_gambar: "https://via.placeholder.com/300",
+                      is_primary: true,
+                      id_barang: 0,
+                    },
+                  ]
+            }
+            renderItem={renderImageItem}
+            keyExtractor={(item) => item.id_gambar.toString()}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={{
+              itemVisiblePercentThreshold: 50,
+            }}
+          />
+          {/* Indikator Carousel */}
+          {barang.gambar.length > 1 && (
+            <View style={styles.indicatorContainer}>
+              {barang.gambar.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.indicator,
+                    currentImageIndex === index && styles.activeIndicator,
+                  ]}
+                />
+              ))}
+            </View>
+          )}
+        </View>
+
         <View style={styles.contentContainer}>
           <Text style={styles.barangName}>{barang.nama_barang}</Text>
           <Text style={styles.barangPrice}>
@@ -185,7 +258,13 @@ export default function ProductDetails() {
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Garansi:</Text>
               <Text style={styles.detailValue}>
-                {barang.garansi || "Tidak ada"}
+                {barang.garansi ? formatLocalDate(barang.garansi) : "-"}
+              </Text>
+            </View>
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Status Garansi:</Text>
+              <Text style={styles.detailValue}>
+                {getWarrantyStatus(barang.garansi)}
               </Text>
             </View>
             <View style={styles.detailRow}>
@@ -216,6 +295,8 @@ export default function ProductDetails() {
   );
 }
 
+const { width } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -224,11 +305,34 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 16,
   },
+  carouselContainer: {
+    position: "relative",
+  },
   productImage: {
-    width: "100%",
+    width: width,
     height: 300,
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
+  },
+  indicatorContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    bottom: 10,
+    width: "100%",
+  },
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#ffffff",
+    opacity: 0.5,
+    marginHorizontal: 4,
+  },
+  activeIndicator: {
+    opacity: 1,
+    backgroundColor: "#38e07b",
   },
   contentContainer: {
     paddingHorizontal: 16,

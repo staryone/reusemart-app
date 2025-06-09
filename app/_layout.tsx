@@ -98,7 +98,10 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
-        <Stack.Screen name="pembeli/daftarTransaksi" options={{headerShown: false}}/> 
+        <Stack.Screen
+          name="pembeli/daftarTransaksi"
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="kurir/pengiriman"
           options={{ headerShown: false }}
@@ -106,6 +109,10 @@ export default function RootLayout() {
         <Stack.Screen
           name="penitip/daftarBarang"
           options={{ headerShown: false, title: "Daftar Barang" }}
+        />
+        <Stack.Screen
+          name="detail-produk"
+          options={{ headerShown: false, title: "Detail Barang" }}
         />
         <Stack.Screen name="+not-found" />
       </Stack>

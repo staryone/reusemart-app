@@ -90,30 +90,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="detail-produk/index"
-        options={{
-          title: "DetailProduk",
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons name="settings" size={28} color={color} />
-          ),
-          tabBarButton: (props) => (
-            <HapticTab
-              {...props}
-              onPress={(e) => {
-                if (!isLoggedIn) {
-                  e.preventDefault();
-                  router.push("/(auth)/login");
-                } else {
-                  if (props.onPress) {
-                    props.onPress(e);
-                  }
-                }
-              }}
-            />
-          ),
-        }}
-      />
     </Tabs>
   );
 }
