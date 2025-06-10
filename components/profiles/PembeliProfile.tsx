@@ -94,7 +94,14 @@ export default function PembeliProfile() {
 
   useEffect(() => {
     fetchProfile();
-  }, [fetchProfile]);
+    // Add focus listener to refresh profile when screen is focused
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchProfile();
+    });
+
+    // Clean up listener on unmount
+    return unsubscribe;
+  }, [fetchProfile, navigation]);
 
   const onRefresh = () => {
     fetchProfile(true);
@@ -182,7 +189,7 @@ export default function PembeliProfile() {
               onPress={() => router.push("/pembeli/merchandise")}
             >
               <View style={styles.accountIconContainer}>
-                <Icon name="history" size={24} color="#38e07b" />
+                <Icon name="card-giftcard" size={24} color="#38e07b" />
               </View>
               <View style={styles.accountTextContainer}>
                 <Text style={styles.accountLabel}>Merchandise</Text>
