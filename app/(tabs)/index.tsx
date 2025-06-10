@@ -267,7 +267,7 @@ export default function HomeScreen() {
         }
         data={barangList}
         renderItem={renderBarang}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id_barang.toString()} // Use id_barang as key
         numColumns={2}
         columnWrapperStyle={styles.columnWrapper}
         contentContainerStyle={styles.listContent}
