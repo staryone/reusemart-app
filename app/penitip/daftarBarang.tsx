@@ -1,10 +1,20 @@
-import { AuthContext } from '@/context/authContext';
-import { BASE_API_URL } from '@/utils/api';
-import { router } from 'expo-router';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { Image, Platform, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { AuthContext } from "@/context/authContext";
+import { BASE_API_URL } from "@/utils/api";
+import { router } from "expo-router";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import {
+  Image,
+  Platform,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Button, Menu, Portal, Provider } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Icon from "react-native-vector-icons/MaterialIcons";
 
 interface Gambar {
   id_gambar: string;
@@ -58,16 +68,21 @@ export default function DaftarBarang() {
   const [refreshing, setRefreshing] = useState(false);
   const [penitip, setPenitip] = useState<Penitip | null>(null);
   const authContext = useContext(AuthContext);
+  const [visible, setVisible] = React.useState(false);
+  const [selected, setSelected] = React.useState("Select item");
+
+  const openMenu = () => setVisible(true);
+  const closeMenu = () => setVisible(false);
 
   if (!authContext) {
-    throw new Error('AuthContext must be used within an AuthProvider');
+    throw new Error("AuthContext must be used within an AuthProvider");
   }
   const { token, isLoggedIn } = authContext;
 
   const fetchPenitipan = useCallback(
     async (isRefresh = false) => {
       if (!isLoggedIn || !token) {
-        setError('Silakan masuk untuk melihat daftar barang');
+        setError("Silakan masuk untuk melihat daftar barang");
         setLoading(false);
         setRefreshing(false);
         return;
@@ -88,7 +103,7 @@ export default function DaftarBarang() {
 
         const res: ResponseAPI = await response.json();
         if (!response.ok) {
-          throw new Error(res.errors || 'Gagal mengambil data barang');
+          throw new Error(res.errors || "Gagal mengambil data barang");
         }
 
         if (res.data) {
@@ -96,7 +111,7 @@ export default function DaftarBarang() {
         }
         setError(null);
       } catch (err) {
-        setError('Terjadi kesalahan saat mengambil data barang');
+        setError("Terjadi kesalahan saat mengambil data barang");
         console.error(err);
       } finally {
         setLoading(false);
@@ -116,9 +131,9 @@ export default function DaftarBarang() {
 
   // Format price to Indonesian Rupiah
   const formatRupiah = (value: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
       minimumFractionDigits: 0,
     }).format(value);
   };
@@ -126,7 +141,9 @@ export default function DaftarBarang() {
   // Get primary image or fallback
   const getPrimaryGambar = (gambars: Gambar[]): string => {
     const primaryGambar = gambars.find((gambar) => gambar.is_primary);
-    return primaryGambar ? primaryGambar.url_gambar : 'https://via.placeholder.com/150';
+    return primaryGambar
+      ? primaryGambar.url_gambar
+      : "https://via.placeholder.com/150";
   };
 
   // Flatten penitipan to get detail_penitipan list
@@ -134,7 +151,7 @@ export default function DaftarBarang() {
     ? penitip.penitipan.flatMap((penitipan) => penitipan.detail_penitipan)
     : [];
 
-  if(loading) {
+  if (loading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -161,8 +178,10 @@ export default function DaftarBarang() {
         <View style={[styles.header, styles.backdropBlur]}>
           <View style={styles.headerContent}>
             <TouchableOpacity
-              onPress={() => 
-                router.canGoBack() ? router.back() : router.push("/(tabs)/Profil")
+              onPress={() =>
+                router.canGoBack()
+                  ? router.back()
+                  : router.push("/(tabs)/Profil")
               }
               accessible
               accessibilityLabel="Kembali ke profil"
@@ -180,6 +199,30 @@ export default function DaftarBarang() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         >
+          <Provider>
+            <Portal>
+              <Menu
+                visible={visible}
+                onDismiss={closeMenu}
+                anchor={<Button onPress={openMenu}>{selected}</Button>}
+              >
+                <Menu.Item
+                  onPress={() => {
+                    setSelected("Apple");
+                    closeMenu();
+                  }}
+                  title="Apple"
+                />
+                <Menu.Item
+                  onPress={() => {
+                    setSelected("Banana");
+                    closeMenu();
+                  }}
+                  title="Banana"
+                />
+              </Menu>
+            </Portal>
+          </Provider>
           {/* Barang Section */}
           <View style={styles.barangSection}>
             {detailPenitipanList.length === 0 ? (
@@ -193,30 +236,38 @@ export default function DaftarBarang() {
                     resizeMode="cover"
                   />
                   <View style={styles.barangInfo}>
-                    <Text style={styles.barangName}>{item.barang.nama_barang}</Text>
-                    <Text style={styles.barangPrice}>{formatRupiah(item.barang.harga)}</Text>
-                    <Text style={styles.barangCategory}>{item.barang.kategori.nama_kategori}</Text>
+                    <Text style={styles.barangName}>
+                      {item.barang.nama_barang}
+                    </Text>
+                    <Text style={styles.barangPrice}>
+                      {formatRupiah(item.barang.harga)}
+                    </Text>
+                    <Text style={styles.barangCategory}>
+                      {item.barang.kategori.nama_kategori}
+                    </Text>
                     <View
                       style={[
                         styles.statusBadge,
                         {
                           backgroundColor:
-                            item.barang.status === 'TERSEDIA'
-                              ? '#38e07b'
-                              : item.barang.status === 'TERJUAL'
-                              ? '#3b82f6'
-                              : item.barang.status === 'DIDONASIKAN'
-                              ? '#8b5cf6'
-                              : item.barang.status === 'KEMBALI'
-                              ? '#ef4444'
-                              : item.barang.status === 'MENUNGGU_KEMBALI'
-                              ? '#f59e0b'
-                              : '#6b7280',
+                            item.barang.status === "TERSEDIA"
+                              ? "#38e07b"
+                              : item.barang.status === "TERJUAL"
+                              ? "#3b82f6"
+                              : item.barang.status === "DIDONASIKAN"
+                              ? "#8b5cf6"
+                              : item.barang.status === "KEMBALI"
+                              ? "#ef4444"
+                              : item.barang.status === "MENUNGGU_KEMBALI"
+                              ? "#f59e0b"
+                              : "#6b7280",
                         },
                       ]}
                     >
                       <Text style={styles.statusText}>
-                        {item.barang.status === 'MENUNGGU_KEMBALI' ? 'MENUNGGU DIAMBIL' : item.barang.status}
+                        {item.barang.status === "MENUNGGU_KEMBALI"
+                          ? "MENUNGGU DIAMBIL"
+                          : item.barang.status}
                       </Text>
                     </View>
                   </View>
@@ -233,50 +284,50 @@ export default function DaftarBarang() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   mainContainer: {
     flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'space-between',
+    flexDirection: "column",
+    justifyContent: "space-between",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     fontSize: 18,
-    color: '#0e1a13',
+    color: "#0e1a13",
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   errorText: {
     fontSize: 18,
-    color: '#ef4444',
+    color: "#ef4444",
   },
   header: {
     padding: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: "#e5e7eb",
   },
   backdropBlur: {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
   },
   headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   headerTitle: {
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 20,
-    fontWeight: '700',
-    color: '#0e1a13',
+    fontWeight: "700",
+    color: "#0e1a13",
   },
   scrollView: {
     flex: 1,
@@ -287,16 +338,16 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   barangCard: {
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
+    flexDirection: "row",
+    backgroundColor: "#ffffff",
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: "#e5e7eb",
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
@@ -314,41 +365,45 @@ const styles = StyleSheet.create({
   barangInfo: {
     flex: 1,
     marginLeft: 12,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   barangName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#0e1a13',
+    fontWeight: "600",
+    color: "#0e1a13",
     marginBottom: 4,
   },
   barangPrice: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#38e07b',
+    fontWeight: "500",
+    color: "#38e07b",
     marginBottom: 4,
   },
   barangCategory: {
     fontSize: 12,
-    fontWeight: '400',
-    color: '#6b7280',
+    fontWeight: "400",
+    color: "#6b7280",
     marginBottom: 4,
   },
   statusBadge: {
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 12,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '500',
-    color: '#ffffff',
+    fontWeight: "500",
+    color: "#ffffff",
   },
   noItemsText: {
     fontSize: 16,
-    color: '#6b7280',
-    textAlign: 'center',
+    color: "#6b7280",
+    textAlign: "center",
     marginVertical: 16,
+  },
+  picker: {
+    height: 50,
+    width: "100%",
   },
 });
