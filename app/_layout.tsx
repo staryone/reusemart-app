@@ -118,6 +118,10 @@ export default function RootLayout() {
           name="merchandise"
           options={{ headerShown: true, title: "Merchandise" }}
         />
+        <Stack.Screen
+          name="redeem_history"
+          options={{ headerShown: true, title: "Redeem History" }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
     </AuthProvider>
