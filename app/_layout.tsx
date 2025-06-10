@@ -111,15 +111,15 @@ export default function RootLayout() {
           options={{ headerShown: false, title: "Daftar Barang" }}
         />
         <Stack.Screen
-          name="detail-produk"
+          name="detail-produk/index"
           options={{ headerShown: true, title: "Detail Barang" }}
         />
         <Stack.Screen
-          name="merchandise"
+          name="pembeli/merchandise"
           options={{ headerShown: true, title: "Merchandise" }}
         />
         <Stack.Screen
-          name="redeem_history"
+          name="pembeli/redeem-history"
           options={{ headerShown: true, title: "Redeem History" }}
         />
         <Stack.Screen name="+not-found" />
