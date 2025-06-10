@@ -112,7 +112,11 @@ export default function RootLayout() {
         />
         <Stack.Screen
           name="detail-produk"
-          options={{ headerShown: false, title: "Detail Barang" }}
+          options={{ headerShown: true, title: "Detail Barang" }}
+        />
+        <Stack.Screen
+          name="merchandise"
+          options={{ headerShown: true, title: "Merchandise" }}
         />
         <Stack.Screen name="+not-found" />
       </Stack>

@@ -1,13 +1,21 @@
-import { AuthContext } from '@/context/authContext';
-import { BASE_API_URL } from '@/utils/api';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { router } from 'expo-router';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { Platform, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import LogoutButton from '../LogoutButton';
+import { AuthContext } from "@/context/authContext";
+import { BASE_API_URL } from "@/utils/api";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { router } from "expo-router";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import {
+  Platform,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import LogoutButton from "../LogoutButton";
 
 export type RootStackParamList = {
   PembeliProfile: undefined;
@@ -38,14 +46,14 @@ export default function PembeliProfile() {
   const navigation = useNavigation<NavigationProp>();
 
   if (!authContext) {
-    throw new Error('AuthContext must be used within an AuthProvider');
+    throw new Error("AuthContext must be used within an AuthProvider");
   }
   const { token, isLoggedIn } = authContext;
 
   const fetchProfile = useCallback(
     async (isRefresh = false) => {
       if (!isLoggedIn || !token) {
-        setError('Silakan masuk untuk melihat profil');
+        setError("Silakan masuk untuk melihat profil");
         setLoading(false);
         setRefreshing(false);
         return;
@@ -66,7 +74,7 @@ export default function PembeliProfile() {
 
         const res: ResponseAPI = await response.json();
         if (!response.ok) {
-          throw new Error(res.errors || 'Gagal mengambil data profil');
+          throw new Error(res.errors || "Gagal mengambil data profil");
         }
 
         if (res.data) {
@@ -74,7 +82,7 @@ export default function PembeliProfile() {
         }
         setError(null);
       } catch (err) {
-        setError('Terjadi kesalahan saat mengambil data profil');
+        setError("Terjadi kesalahan saat mengambil data profil");
         console.error(err);
       } finally {
         setLoading(false);
@@ -129,7 +137,7 @@ export default function PembeliProfile() {
           <View style={styles.profileSection}>
             <View style={styles.profileInfo}>
               <Text style={styles.profileName}>
-                {pembeli?.nama || 'Ethan Carter'}
+                {pembeli?.nama || "Ethan Carter"}
               </Text>
             </View>
           </View>
@@ -142,7 +150,7 @@ export default function PembeliProfile() {
               <View style={styles.accountTextContainer}>
                 <Text style={styles.accountLabel}>Email</Text>
                 <Text style={styles.accountValue}>
-                  {pembeli?.email || 'ethan.carter@email.com'}
+                  {pembeli?.email || "ethan.carter@email.com"}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -153,13 +161,13 @@ export default function PembeliProfile() {
               <View style={styles.accountTextContainer}>
                 <Text style={styles.accountLabel}>Nomor Telepon</Text>
                 <Text style={styles.accountValue}>
-                  {pembeli?.nomor_telepon || '+1 (555) 123-4567'}
+                  {pembeli?.nomor_telepon || "+1 (555) 123-4567"}
                 </Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.accountItem}
-              onPress={() => router.push('/pembeli/daftarTransaksi')}
+              onPress={() => router.push("/pembeli/daftarTransaksi")}
             >
               <View style={styles.accountIconContainer}>
                 <Icon name="history" size={24} color="#38e07b" />
@@ -167,6 +175,20 @@ export default function PembeliProfile() {
               <View style={styles.accountTextContainer}>
                 <Text style={styles.accountLabel}>Daftar Transaksi</Text>
                 <Text style={styles.accountValue}>Lihat riwayat transaksi</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.accountItem}
+              onPress={() => router.push("/pembeli/merchandise")}
+            >
+              <View style={styles.accountIconContainer}>
+                <Icon name="history" size={24} color="#38e07b" />
+              </View>
+              <View style={styles.accountTextContainer}>
+                <Text style={styles.accountLabel}>Merchandise</Text>
+                <Text style={styles.accountValue}>
+                  Lihat dan tukar merchandise
+                </Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -189,78 +211,78 @@ export default function PembeliProfile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: "#ffffff",
   },
   mainContainer: {
     flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'space-between',
+    flexDirection: "column",
+    justifyContent: "space-between",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     fontSize: 18,
-    color: '#0e1a13',
+    color: "#0e1a13",
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   errorText: {
     fontSize: 18,
-    color: '#ef4444',
+    color: "#ef4444",
   },
   header: {
-    position: 'sticky',
+    position: "sticky",
     top: 0,
     padding: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: "#e5e7eb",
   },
   backdropBlur: {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
   },
   headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   headerTitle: {
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 20,
-    fontWeight: '700',
-    color: '#0e1a13',
+    fontWeight: "700",
+    color: "#0e1a13",
   },
   scrollView: {
     flex: 1,
     paddingHorizontal: 16,
   },
   profileSection: {
-    width: '100%',
-    flexDirection: 'column',
-    alignItems: 'center',
+    width: "100%",
+    flexDirection: "column",
+    alignItems: "center",
     marginBottom: 24,
   },
   profileInfo: {
-    flexDirection: 'column',
-    alignItems: 'center',
+    flexDirection: "column",
+    alignItems: "center",
     paddingTop: 24,
   },
   profileName: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#0e1a13',
-    textAlign: 'center',
+    fontWeight: "700",
+    color: "#0e1a13",
+    textAlign: "center",
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#0e1a13',
+    fontWeight: "600",
+    color: "#0e1a13",
     marginBottom: 8,
     marginTop: 24,
   },
@@ -268,9 +290,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   accountItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
     padding: 12,
     borderRadius: 12,
     marginBottom: 4,
@@ -278,38 +300,38 @@ const styles = StyleSheet.create({
   accountIconContainer: {
     width: 48,
     height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 12,
-    backgroundColor: '#e8f2ec',
+    backgroundColor: "#e8f2ec",
   },
   accountTextContainer: {
     flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
+    flexDirection: "column",
+    justifyContent: "center",
     marginLeft: 16,
   },
   accountLabel: {
     fontSize: 12,
-    fontWeight: '500',
-    color: '#6b7280',
+    fontWeight: "500",
+    color: "#6b7280",
   },
   accountValue: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#0e1a13',
+    fontWeight: "500",
+    color: "#0e1a13",
   },
   rewardCardSecondary: {
     flex: 1,
-    flexDirection: 'column',
+    flexDirection: "column",
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    backgroundColor: '#ffffff',
+    borderColor: "#e5e7eb",
+    backgroundColor: "#ffffff",
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
@@ -324,19 +346,19 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   rewardItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
   },
   rewardLabelSecondary: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#6b7280',
+    fontWeight: "500",
+    color: "#6b7280",
     marginLeft: 8,
   },
   rewardValueSecondary: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#0e1a13',
+    fontWeight: "700",
+    color: "#0e1a13",
   },
 });
