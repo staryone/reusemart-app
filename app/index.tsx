@@ -1,12 +1,12 @@
 import { router } from "expo-router";
 import React from "react";
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -93,6 +93,54 @@ const ReuseMartInfoScreen: React.FC = () => {
             melalui web dan aplikasi mobile. Jam operasional: 08.00 - 20.00
             setiap hari.
           </Text>
+        </View>
+
+        {/* Bagian Kategori */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Kategori Produk</Text>
+          <Text style={styles.sectionText}>
+            Jelajahi berbagai kategori barang bekas berkualitas di ReuseMart:
+          </Text>
+          <BulletPoint
+            title="Elektronik & Gadget"
+            description="Meliputi barang elektronik bekas dan gadget seperti smartphone, laptop, dan aksesori, menawarkan opsi terjangkau untuk pecinta teknologi."
+          />
+          <BulletPoint
+            title="Pakaian & Aksesori"
+            description="Mencakup pakaian bekas dan aksesori seperti tas, sepatu, dan perhiasan, mempromosikan pilihan fashion berkelanjutan."
+          />
+          <BulletPoint
+            title="Perabotan Rumah Tangga"
+            description="Menampilkan furnitur dan peralatan rumah tangga bekas seperti kursi, meja, dan alat dapur, untuk perbaikan rumah dengan anggaran terbatas."
+          />
+          <BulletPoint
+            title="Buku, Alat Tulis, & Peralatan Sekolah"
+            description="Termasuk buku bekas, alat tulis, dan perlengkapan sekolah, ideal untuk siswa dan pendidik."
+          />
+          <BulletPoint
+            title="Hobi, Mainan, & Koleksi"
+            description="Menyediakan barang terkait hobi, mainan, dan koleksi seperti kit model atau memorabilia vintage untuk para penggemar."
+          />
+          <BulletPoint
+            title="Perlengkapan Bayi & Anak"
+            description="Menawarkan barang bekas bayi dan anak seperti stroller, pakaian, dan mainan, mendukung keluarga yang berkembang secara berkelanjutan."
+          />
+          <BulletPoint
+            title="Otomotif & Aksesori"
+            description="Meliputi suku cadang otomotif bekas dan aksesori seperti jok mobil atau perlengkapan sepeda untuk perawatan dan peningkatan kendaraan."
+          />
+          <BulletPoint
+            title="Perlengkapan Taman & Outdoor"
+            description="Menampilkan alat berkebun bekas, furnitur luar ruangan, dan perlengkapan berkemah untuk pecinta alam."
+          />
+          <BulletPoint
+            title="Peralatan Kantor & Industri"
+            description="Mencakup peralatan kantor bekas seperti printer dan alat industri, melayani kebutuhan bisnis dan tempat kerja."
+          />
+          <BulletPoint
+            title="Kosmetik & Perawatan Diri"
+            description="Termasuk produk kosmetik bekas atau belum dibuka dan barang perawatan pribadi, mempromosikan solusi kecantikan ramah lingkungan."
+          />
         </View>
 
         {/* Tombol Mulai Sekarang */}
