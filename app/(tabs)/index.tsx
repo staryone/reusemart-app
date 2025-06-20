@@ -192,6 +192,8 @@ export default function HomeScreen() {
   // );
   const renderBarang = ({ item }: { item: Barang }) => {
     const isWarrantyActive = getWarrantyStatus(item.garansi) === "Aktif";
+    const isWarrantyNotActive = getWarrantyStatus(item.garansi) === "Berakhir";
+    const isWarrantyNo = getWarrantyStatus(item.garansi) === "Tidak ada";
 
     return (
       <TouchableOpacity
@@ -211,7 +213,17 @@ export default function HomeScreen() {
           />
           {isWarrantyActive && (
             <View style={styles.warrantyBadge}>
-              <Text style={styles.warrantyText}>Bergaransi</Text>
+              <Text style={styles.warrantyText}>Garansi Aktif</Text>
+            </View>
+          )}
+          {isWarrantyNotActive && (
+            <View style={styles.habisWarrantyBadge}>
+              <Text style={styles.warrantyText}>Garansi Habis</Text>
+            </View>
+          )}
+          {isWarrantyNo && (
+            <View style={styles.notWarrantyBadge}>
+              <Text style={styles.warrantyText}>Tidak Bergaransi</Text>
             </View>
           )}
         </View>
@@ -423,6 +435,24 @@ const styles = StyleSheet.create({
     top: 8,
     right: 8,
     backgroundColor: "#38e07b",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  notWarrantyBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "#ff0000",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  habisWarrantyBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "#808080",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,

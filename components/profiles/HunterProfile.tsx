@@ -48,6 +48,7 @@ export default function HunterProfile() {
   const [selectedCommission, setSelectedCommission] = useState<number | null>(
     null
   );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc" | null>(null);
   const authContext = useContext(AuthContext);
   const navigation = useNavigation();
 
@@ -109,6 +110,29 @@ export default function HunterProfile() {
   const toggleCommissionDetails = (index: number) => {
     setSelectedCommission(selectedCommission === index ? null : index);
   };
+
+  const handleSort = () => {
+    setSortOrder((prev) => {
+      if (prev === null) return "asc";
+      if (prev === "asc") return "desc";
+      return null;
+    });
+  };
+
+  const sortedCommissions = useCallback(() => {
+    if (!hunter?.detail_penitipan || sortOrder === null) {
+      return (
+        hunter?.detail_penitipan?.flatMap((penitipan) => penitipan.barang) || []
+      );
+    }
+
+    const allCommissions = hunter.detail_penitipan.flatMap(
+      (penitipan) => penitipan.barang
+    );
+    return [...allCommissions].sort((a, b) => {
+      return sortOrder === "asc" ? a.komisi - b.komisi : b.komisi - a.komisi;
+    });
+  }, [hunter, sortOrder]);
 
   if (loading) {
     return (
@@ -195,10 +219,32 @@ export default function HunterProfile() {
           </View>
 
           {/* Commission History */}
-          <Text style={styles.sectionTitle}>Riwayat Komisi</Text>
+          <View style={styles.commissionHeader}>
+            <Text style={styles.sectionTitle}>Riwayat Komisi</Text>
+            <TouchableOpacity style={styles.sortButton} onPress={handleSort}>
+              <Icon
+                name={
+                  sortOrder === "asc"
+                    ? "arrow-upward"
+                    : sortOrder === "desc"
+                    ? "arrow-downward"
+                    : "sort"
+                }
+                size={20}
+                color="#38e07b"
+              />
+              <Text style={styles.sortButtonText}>
+                {sortOrder === null
+                  ? "Urutkan"
+                  : sortOrder === "asc"
+                  ? "Terkecil"
+                  : "Terbesar"}
+              </Text>
+            </TouchableOpacity>
+          </View>
           <View style={styles.commissionSection}>
-            {hunter && hunter.detail_penitipan?.[0]?.barang?.length > 0 ? (
-              hunter.detail_penitipan[0].barang.map((item, index) => (
+            {sortedCommissions().length > 0 ? (
+              sortedCommissions().map((item, index) => (
                 <TouchableOpacity
                   key={index}
                   style={styles.commissionItem}
@@ -348,7 +394,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#0e1a13",
     marginBottom: 8,
-    marginTop: 24,
   },
   accountSection: {
     marginBottom: 16,
@@ -423,6 +468,27 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     color: "#ffffff",
+  },
+  commissionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+    marginTop: 24,
+  },
+  sortButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#e8f2ec",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+  },
+  sortButtonText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#38e07b",
+    marginLeft: 4,
   },
   commissionSection: {
     marginBottom: 16,
